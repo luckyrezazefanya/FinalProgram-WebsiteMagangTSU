@@ -195,7 +195,7 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = "{{ route('documents.store') }}#documents";
+                        window.location.href = "{{ route('setting') }}#extra";
                     }
                 });
                 return;
