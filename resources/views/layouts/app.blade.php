@@ -143,6 +143,9 @@
             $isMahasiswa = $role === 'mahasiswa';
             $isDosen = $role === 'dosen';
             $isAdmin = $role === 'admin';
+            $isAdminUniversitas = $role === 'admin_universitas';
+            $isAdminProdi = $role === 'admin_prodi';
+            $isAnyAdmin = $isAdmin || $isAdminUniversitas || $isAdminProdi;
 
             $activeClass = 'bg-[#074755] text-white shadow-md';
             $inactiveClass = 'bg-white text-black hover:bg-gray-100 transition shadow-sm';
@@ -233,9 +236,9 @@
                 </a>
             @endif
 
-            @if($isAdmin)
-                <a href="{{ route('admin.pengumuman.index') }}"
-                    class="flex items-center gap-3 px-6 py-3 rounded-full font-bold {{ request()->routeIs('admin.pengumuman.index') ? $activeClass : $inactiveClass }}">
+            @if($isAnyAdmin)
+                <a href="{{ route('admin.dashboard') }}"
+                    class="flex items-center gap-3 px-6 py-3 rounded-full font-bold {{ request()->routeIs('admin.dashboard') ? $activeClass : $inactiveClass }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -243,6 +246,8 @@
                     </svg>
                     Pengumuman
                 </a>
+                
+                @if($isAdmin)
                 <a href="{{ route('admin.program.index') }}"
                     class="flex items-center gap-3 px-6 py-3 rounded-full font-bold {{ request()->routeIs('admin.program*') ? $activeClass : $inactiveClass }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -261,7 +266,9 @@
                     </svg>
                     ACC Pendaftaran
                 </a>
-                <a href="{{ route('admin.mahasiswa.index') }}"
+                @endif
+
+                <a href="{{ route('admin.mahasiswa.index', $isAdminUniversitas ? ['role' => 'universitas'] : []) }}"
                     class="flex items-center gap-3 px-6 py-3 rounded-full font-bold {{ request()->routeIs('admin.mahasiswa*') ? $activeClass : $inactiveClass }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
