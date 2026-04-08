@@ -11,7 +11,7 @@ class ProgramMagangTampilController extends Controller
 {
     public function index()
     {
-        $programs = ProgramMagang::with('mitra')->get();
+        $programs = ProgramMagang::with(['mitra', 'pendaftaran.mahasiswa.user'])->get();
 
         $jumlahPeserta = Mahasiswa::count();
         $pesertaAktif = Pendaftaran::where('status', 'diterima')->count();
@@ -22,13 +22,13 @@ class ProgramMagangTampilController extends Controller
 
     public function show($id_program)
     {
-        $program = ProgramMagang::with('mitra')->findOrFail($id_program);
+        $program = ProgramMagang::with(['mitra', 'pendaftaran'])->findOrFail($id_program);
         $user = auth()->user();
 
         $hasDocuments = false;
         $isRegistered = false;
 
-        if ($user) {
+        if ($user && $user->role === 'mahasiswa' && $user->mahasiswa) {
             $berkas = BerkasMahasiswa::where('user_id', $user->id)->first();
 
             $hasDocuments = $berkas && $berkas->isLengkap();

@@ -23,8 +23,8 @@ class MataKuliahController extends Controller
             $validated = $request->validate([
                 'id_matkul' => 'required|string|max:10|unique:mata_kuliah,id_matkul',
                 'nama_matkul' => 'required|string|max:100',
-                'sks'         => 'required|integer|min:1',
-                'semester'    => 'required|string|max:2',
+                'sks' => 'required|integer|min:1',
+                'semester' => 'required|string|max:2',
             ]);
 
             $data = MataKuliah::create($validated);
@@ -73,5 +73,17 @@ class MataKuliahController extends Controller
         } catch (QueryException $e) {
             return response()->json(['message' => 'Error delete', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->q;
+
+        $matkul = MataKuliah::where('kode_mk', 'like', "%$query%")
+            ->orWhere('nama_matkul', 'like', "%$query%")
+            ->limit(5)
+            ->get();
+
+        return response()->json($matkul);
     }
 }

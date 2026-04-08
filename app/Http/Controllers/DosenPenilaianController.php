@@ -10,28 +10,29 @@ class DosenPenilaianController extends Controller
 {
     public function index()
     {
-        $nuptk = '1234567890'; // sementara (sesuai dosen login)
+        $nuptk = auth()->user()->dosen->nuptk;
 
-        $mahasiswa = Mahasiswa::with('penilaian')
-            ->whereHas('pembimbing', fn($q) => $q->where('nuptk', $nuptk))
+        $mahasiswa = Mahasiswa::with(['user', 'programMagang', 'penilaian'])
+            ->whereHas('pendaftaran', function ($q) use ($nuptk) {
+                $q->where('nuptk', $nuptk)
+                    ->where('status', 'diterima');
+            })
             ->get();
 
         return view('dosen.penilaian', compact('mahasiswa'));
     }
 
-    public function store(Request $request, $nim)
+
+    public function store(Request $request)
     {
         $request->validate([
-            'nilai' => 'required|integer|min:0|max:100',
-            'catatan' => 'nullable|string'
+            'nim' => 'required|exists:mahasiswa,nim',
         ]);
 
         Penilaian::updateOrCreate(
-            ['nim' => $nim],
+            ['nim' => $request->nim],
             [
-                'nuptk' => '1234567890',
-                'nilai' => $request->nilai,
-                'catatan' => $request->catatan
+                'nuptk' => auth()->user()->dosen->nuptk
             ]
         );
 

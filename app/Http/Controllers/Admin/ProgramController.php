@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ProgramMagang;
-use App\Models\Mitra; 
+use App\Models\Mitra;
 use Illuminate\Database\QueryException;
 
 class ProgramController extends Controller
@@ -18,11 +18,24 @@ class ProgramController extends Controller
         // Fetch all programs with their related Mitra (if needed)
         // Assuming there is a relation, though ProgramMagang model had `id_mitra`.
         // Let's check if we need to pass 'mitra' list for the create/edit modal dropdown.
-        
-        $programs = ProgramMagang::with('mitra')->latest()->get(); 
+
+        $programs = ProgramMagang::with([
+            'mitra',
+            'pendaftaran' => function ($query) {
+                $query->whereIn('status', ['Lolos', 'Menunggu', 'lolos', 'menunggu'])
+                    ->with('mahasiswa.user');
+            }
+        ])->latest()->get();
         $mitras = Mitra::all(); // We need this for the "Perusahaan" dropdown if it's a relation
 
         return view('admin.program.index', compact('programs', 'mitras'));
+    }
+
+    public function show($id)
+    {
+        $program = ProgramMagang::with('mitra')->findOrFail($id);
+        $mitras = Mitra::all();
+        return view('admin.program.index-detail', compact('program', 'mitras'));
     }
 
     /**
@@ -31,20 +44,24 @@ class ProgramController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_program'        => 'required|string|max:8|unique:program_magang,id_program',
-            'nama_program'      => 'required|string|max:100',
-            'jenis_bkp'         => 'required|string|max:50',
+            'id_program' => 'required|string|max:8|unique:program_magang,id_program',
+            'nama_program' => 'required|string|max:100',
+            'jenis_bkp' => 'required|string|max:50',
             'lokasi_penempatan' => 'required|string|max:254',
-            'id_mitra'          => 'required|string|exists:mitra,id_mitra',
-            'periode'           => 'required|string|max:20',
-            'kuota'             => 'required|integer|min:1',
-            'syarat'            => 'nullable|string',
+            'id_mitra' => 'required|string|exists:mitra,id_mitra',
+            'periode' => 'required|string|max:20',
+            'kuota' => 'required|integer|min:1',
+            'syarat' => 'nullable|string',
             'deskripsi_silabus' => 'nullable|string',
-            'dampak_program'    => 'nullable|string'
+            'dampak_program' => 'nullable|string',
+            'prodi' => 'nullable|array',
+            'prodi.*' => 'in:IF,SI',
         ]);
 
         try {
-            ProgramMagang::create($request->all());
+            $data = $request->except('prodi');
+            $data['prodi'] = $request->input('prodi', []);
+            ProgramMagang::create($data);
             return redirect()->back()->with('success', 'Program Magang berhasil ditambahkan');
         } catch (QueryException $e) {
             return redirect()->back()->with('error', 'Gagal menambahkan program: ' . $e->getMessage());
@@ -59,19 +76,23 @@ class ProgramController extends Controller
         $program = ProgramMagang::findOrFail($id);
 
         $request->validate([
-            'nama_program'      => 'required|string|max:100',
-            'jenis_bkp'         => 'required|string|max:50',
+            'nama_program' => 'required|string|max:100',
+            'jenis_bkp' => 'required|string|max:50',
             'lokasi_penempatan' => 'required|string|max:254',
-            'id_mitra'          => 'required|string|exists:mitra,id_mitra',
-            'periode'           => 'required|string|max:20',
-            'kuota'             => 'required|integer|min:1',
-            'syarat'            => 'nullable|string',
+            'id_mitra' => 'required|string|exists:mitra,id_mitra',
+            'periode' => 'required|string|max:20',
+            'kuota' => 'required|integer|min:1',
+            'syarat' => 'nullable|string',
             'deskripsi_silabus' => 'nullable|string',
-            'dampak_program'    => 'nullable|string'
+            'dampak_program' => 'nullable|string',
+            'prodi' => 'nullable|array',
+            'prodi.*' => 'in:IF,SI',
         ]);
 
         try {
-            $program->update($request->all());
+            $data = $request->except('prodi');
+            $data['prodi'] = $request->input('prodi', []);
+            $program->update($data);
             return redirect()->back()->with('success', 'Program Magang berhasil diperbarui');
         } catch (QueryException $e) {
             return redirect()->back()->with('error', 'Gagal memperbarui program: ' . $e->getMessage());
@@ -84,7 +105,7 @@ class ProgramController extends Controller
     public function destroy($id)
     {
         $program = ProgramMagang::findOrFail($id);
-        
+
         try {
             $program->delete();
             return redirect()->back()->with('success', 'Program Magang berhasil dihapus');

@@ -11,12 +11,15 @@ class PendaftaranController extends Controller
 {
     public function index()
     {
-        // Fetch pendaftaran with related mahasiswa and program
-        $pendaftarans = Pendaftaran::with(['mahasiswa.user', 'programMagang.mitra'])
+        // Fetch pendaftaran with related mahasiswa, program, and assigned dosen
+        $pendaftarans = Pendaftaran::with(['mahasiswa.user', 'programMagang.mitra', 'dosen.user'])
             ->latest()
             ->get();
 
-        return view('admin.pendaftaran.index', compact('pendaftarans'));
+        // Fetch users with role 'dosen' that have a dosen profile
+        $dosens = \App\Models\Dosen::with('user')->get();
+
+        return view('admin.pendaftaran.index', compact('pendaftarans', 'dosens'));
     }
 
     public function update(Request $request, $id)
@@ -25,16 +28,15 @@ class PendaftaranController extends Controller
 
         $request->validate([
             'status' => 'required|in:diterima,ditolak',
-            'alasan' => 'nullable|string' // In case we want to store rejection reason later (though schema didn't seem to have it, we can pass it to view/session if needed or just update status)
+            'alasan' => 'nullable|string'
         ]);
 
         try {
-            // Note: The schema for pendaftaran table has 'status' enum ['menunggu', 'diterima', 'ditolak']
-            // It does NOT seem to have an 'alasan' column based on the migration review previously.
-            // So we will just update the status.
-
             $pendaftaran->update([
-                'status' => $request->status
+                'status' => $request->status,
+                'alasan' => $request->status === 'ditolak'
+                    ? $request->alasan
+                    : null
             ]);
 
             $message = $request->status === 'diterima'
@@ -50,6 +52,31 @@ class PendaftaranController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memperbarui status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function assignDospem(Request $request, $id)
+    {
+        $request->validate([
+            'nuptk' => 'required|exists:dosen,nuptk'
+        ]);
+
+        $pendaftaran = Pendaftaran::findOrFail($id);
+
+        try {
+            $pendaftaran->update([
+                'nuptk' => $request->nuptk
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Dosen pembimbing berhasil ditetapkan.'
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menetapkan dosen: ' . $e->getMessage()
             ], 500);
         }
     }

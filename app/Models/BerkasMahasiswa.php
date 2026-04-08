@@ -13,6 +13,7 @@ class BerkasMahasiswa extends Model
         'cv_file',
         'transkrip_file',
         'krs_file',
+        'sertifikat_magang',
         'is_verified',
     ];
 

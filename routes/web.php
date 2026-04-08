@@ -17,6 +17,8 @@ use App\Http\Controllers\DosenPenilaianController;
 use App\Http\Controllers\Admin\DataMahasiswaController;
 use App\Http\Controllers\Admin\PengumumanController;
 use App\Http\Controllers\Admin\ProgramController;
+use App\Http\Controllers\MataKuliahController;
+use App\Http\Controllers\MahasiswaPenilaianController;
 use App\Http\Controllers\Admin\PendaftaranController as AdminPendaftaranController;
 
 
@@ -35,27 +37,7 @@ Route::get('/whoami', function () {
 // Landing page (PUBLIC)
 Route::get('/', fn() => view('layouts.landing'))->name('landing');
 
-Route::middleware('guest')->group(function () {
-    Route::get('/register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-
-    Route::post('/register', [RegisteredUserController::class, 'store'])
-        ->name('register.store');
-
-    // FORGOT PASSWORD
-    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
-        ->name('password.request');
-
-    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->name('password.email');
-    // tampilkan form reset
-    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
-        ->name('password.reset');
-
-    // proses reset password
-    Route::post('/reset-password', [NewPasswordController::class, 'store'])
-        ->name('password.reset.store');
-});
+// Guest routes are handled in routes/auth.php
 
 // Semua halaman yang butuh login
 Route::middleware('auth')->group(function () {
@@ -80,7 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/password/update', [ProfileController::class, 'updatePassword'])
         ->name('profile.password.update');
 
-    Route::get('/logbookview', [LogbookController::class, 'index'])->name('logbook');
+    Route::get('/logbookview', [LogbookController::class, 'index'])->name('logbook.logbook');
     Route::get('/logbook', [LogbookController::class, 'index'])->name('logbook.index');
     Route::post('/logbook', [LogbookController::class, 'store'])->name('logbook.store');
     Route::get('/setting', fn() => view('layouts.setting'))->name('setting');
@@ -98,6 +80,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/penilaian', fn() => view('mahasiswa.penilaian.penilaian'))->name('penilaian');
+    Route::post('/penilaian/store', [MahasiswaPenilaianController::class, 'store'])->name('penilaian.store.mhs');
     Route::get('/pembimbing', fn() => view('mahasiswa.pembimbing.pembimbing'))->name('pembimbing');
 
     Route::put('/password', [App\Http\Controllers\Auth\PasswordController::class, 'update'])
@@ -108,6 +91,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/dosen/{nuptk}/kontak', [DosenController::class, 'updateKontak'])->name('dosen.kontak.update');
 
     Route::post('/documents', [BerkasMahasiswaController::class, 'store'])->name('documents.store');
+
+    Route::get('/search-matkul', [MataKuliahController::class, 'search']);
 
 
 
@@ -129,6 +114,13 @@ Route::middleware(['auth', 'role:dosen'])->group(function () {
         $programs = \App\Models\ProgramMagang::with('mitra')->get();
         return view('dosen.programdosen', compact('programs'));
     })->name('dosen.view_program');
+
+    Route::get('/dosen/program/{id}', function ($id) {
+        $program = \App\Models\ProgramMagang::with('mitra')->findOrFail($id);
+        $hasDocuments = false;
+        $isRegistered = false;
+        return view('dosen.programdosen-detail', compact('program', 'hasDocuments', 'isRegistered'));
+    })->name('dosen.program.show');
 
 
     Route::get('/dosen/dashboard', function () {
@@ -189,6 +181,8 @@ Route::middleware(['auth', 'role:admin|admin_universitas|admin_prodi'])->group(f
 
     Route::get('/admin/mahasiswa', [DataMahasiswaController::class, 'index'])
         ->name('admin.mahasiswa.index');
+    Route::get('/konversi', [\App\Http\Controllers\Admin\AdminKonversiController::class, 'index'])->name('admin.konversi.index');
+    Route::post('/admin/konversi/{nim}/validasi', [\App\Http\Controllers\Admin\AdminKonversiController::class, 'validasi'])->name('admin.konversi.validasi');
 });
 
 
@@ -198,17 +192,21 @@ Route::middleware(['auth', 'role:admin|admin_universitas|admin_prodi'])->group(f
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/admin/program', [ProgramController::class, 'index'])->name('admin.program.index');
+    Route::get('/admin/program/{id}', [ProgramController::class, 'show'])->name('admin.program.show');
     Route::post('/admin/program', [ProgramController::class, 'store'])->name('admin.program.store');
     Route::put('/admin/program/{id}', [ProgramController::class, 'update'])->name('admin.program.update');
     Route::delete('/admin/program/{id}', [ProgramController::class, 'destroy'])->name('admin.program.destroy');
 
     Route::get('/admin/pendaftaran', [AdminPendaftaranController::class, 'index'])->name('admin.pendaftaran.index');
     Route::put('/admin/pendaftaran/{id}', [AdminPendaftaranController::class, 'update'])->name('admin.pendaftaran.update');
+    Route::put('/admin/pendaftaran/{id}/assign-dospem', [AdminPendaftaranController::class, 'assignDospem'])->name('admin.pendaftaran.assignDospem');
 
     Route::get('/admin/pengumuman', [PengumumanController::class, 'index'])->name('admin.pengumuman.index');
     Route::post('/admin/pengumuman', [PengumumanController::class, 'store'])->name('admin.pengumuman.store');
     Route::put('/admin/pengumuman/{id}', [PengumumanController::class, 'update'])->name('admin.pengumuman.update');
     Route::delete('/admin/pengumuman/{id}', [PengumumanController::class, 'destroy'])->name('admin.pengumuman.destroy');
+    Route::get('/konversi', [\App\Http\Controllers\Admin\AdminKonversiController::class, 'index'])->name('admin.konversi.index');
+    Route::post('/admin/konversi/{nim}/validasi', [\App\Http\Controllers\Admin\AdminKonversiController::class, 'validasi'])->name('admin.konversi.validasi');
 });
 
 

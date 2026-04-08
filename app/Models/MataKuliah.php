@@ -7,12 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class MataKuliah extends Model
 {
     protected $table = 'mata_kuliah';
-    protected $primaryKey = 'id_matkul';
-
-    public $incrementing = false;         // penting!
-    protected $keyType = 'string';        // penting!
 
     protected $fillable = [
-        'id_matkul', 'nama_matkul', 'sks', 'semester'
+        'kode_mk',
+        'nama_mk',
+        'sks',
+        'semester',
+        'prodi'
     ];
+
+    /**
+     * Relasi ke konversi_mk
+     */
+    public function konversi()
+    {
+        return $this->hasMany(KonversiMk::class, 'kode_mk', 'kode_mk');
+    }
 }

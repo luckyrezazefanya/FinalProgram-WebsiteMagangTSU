@@ -182,7 +182,7 @@
                     </svg>
                     Program
                 </a>
-                <a href="{{ route('logbook') }}"
+                <a href="{{ route('logbook.index') }}"
                     class="flex items-center gap-3 px-6 py-3 rounded-full font-bold {{ request()->routeIs('logbook*') ? $activeClass : $inactiveClass }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -246,26 +246,31 @@
                     </svg>
                     Pengumuman
                 </a>
-                
+
                 @if($isAdmin)
-                <a href="{{ route('admin.program.index') }}"
-                    class="flex items-center gap-3 px-6 py-3 rounded-full font-bold {{ request()->routeIs('admin.program*') ? $activeClass : $inactiveClass }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    Kelola Program
-                </a>
-                <a href="{{ route('admin.pendaftaran.index') }}"
-                    class="flex items-center gap-3 px-6 py-3 rounded-full font-bold {{ request()->routeIs('admin.pendaftaran*') ? $activeClass : $inactiveClass }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    ACC Pendaftaran
-                </a>
+                    <a href="{{ route('admin.program.index') }}"
+                        class="flex items-center gap-3 px-6 py-3 rounded-full font-bold {{ request()->routeIs('admin.program*') ? $activeClass : $inactiveClass }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        Kelola Program
+                    </a>
+                    <a href="{{ route('admin.pendaftaran.index') }}"
+                        class="flex items-center gap-3 px-6 py-3 rounded-full font-bold {{ request()->routeIs('admin.pendaftaran*') ? $activeClass : $inactiveClass }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        ACC Pendaftaran
+                    </a>
+
+                    <a href="{{ route('admin.konversi.index') }}"
+                        class="flex items-center gap-3 px-6 py-3 rounded-full font-bold {{ request()->routeIs('admin.konversi*') ? $activeClass : $inactiveClass }}">
+                        Validasi Konversi
+                    </a>
                 @endif
 
                 <a href="{{ route('admin.mahasiswa.index', $isAdminUniversitas ? ['role' => 'universitas'] : []) }}"

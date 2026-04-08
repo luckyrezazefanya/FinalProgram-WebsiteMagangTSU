@@ -21,6 +21,7 @@ class Mahasiswa extends Model
         'angkatan',
         'status',
         'nomor_telepon',
+        'pengajuan_konversi',
         'posisi',
         'riwayat_magang',
         'foto',
@@ -61,6 +62,16 @@ class Mahasiswa extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function konversi()
+    {
+        return $this->hasMany(KonversiMk::class, 'nim', 'nim');
+    }
+
+    public function programMagang()
+    {
+        return $this->belongsTo(ProgramMagang::class, 'id_program', 'id_program');
     }
 }
 

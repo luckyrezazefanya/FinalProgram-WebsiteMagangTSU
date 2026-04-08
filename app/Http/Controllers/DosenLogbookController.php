@@ -13,27 +13,32 @@ class DosenLogbookController extends Controller
     {
         $nuptk = auth()->user()->dosen->nuptk;
 
-        // ambil mahasiswa bimbingan 
-        $mahasiswa = Mahasiswa::with([
-            'logbook' => function ($q) {
-                $q->where('status_validasi', 'belum divalidasi');
-            }
-        ])
-            ->whereHas('pembimbing', function ($q) use ($nuptk) {
-                $q->where('nuptk', $nuptk);
+        $mahasiswa = Mahasiswa::with('logbook')
+            ->whereHas('pendaftaran', function ($q) use ($nuptk) {
+                $q->where('nuptk', $nuptk)
+                    ->where('status', 'diterima');
             })
             ->get();
 
-        // Hitung total pending dan success dari mahasiswa bimbingan
         $countPending = 0;
         $countSuccess = 0;
 
         foreach ($mahasiswa as $mhs) {
-            $countPending += $mhs->logbook->where('status_validasi', 'pending')->count();
-            $countSuccess += $mhs->logbook->where('status_validasi', 'disetujui')->count();
+
+            $countPending += $mhs->logbook
+                ->where('status_validasi', 'pending')
+                ->count();
+
+            $countSuccess += $mhs->logbook
+                ->whereIn('status_validasi', ['disetujui', 'ditolak'])
+                ->count();
         }
 
-        return view('dosen.logbook', compact('mahasiswa', 'countPending', 'countSuccess'));
+        return view('dosen.logbook', compact(
+            'mahasiswa',
+            'countPending',
+            'countSuccess'
+        ));
     }
 
     public function validasi(Request $request, $id)
@@ -55,17 +60,17 @@ class DosenLogbookController extends Controller
     public function tolak(Request $request, $id)
     {
         $request->validate([
-            'respo_revisi' => 'required|string'
+            'alasan' => 'required|string'
         ]);
 
         $logbook = LogBook::findOrFail($id);
 
         $logbook->update([
-            'status_validasi' => 'revisi',
-            'respo_revisi' => $request->respo_revisi
+            'status_validasi' => 'ditolak',
+            'alasan' => $request->alasan
         ]);
 
-        return back()->with('success', 'Logbook dikembalikan untuk revisi');
+        return back()->with('success', 'Logbook ditolak');
     }
 
     public function getLogbooks($nim)

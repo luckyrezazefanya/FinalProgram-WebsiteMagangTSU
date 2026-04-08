@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\DB;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -22,10 +23,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Password::defaults(function () {
-        return Password::min(10)
-            ->mixedCase()   // huruf besar + kecil
-            ->numbers()     // angka
-            ->symbols();    // simbol
-    });
+            return Password::min(10)
+                ->mixedCase()   // huruf besar + kecil
+                ->numbers()     // angka
+                ->symbols();    // simbol
+
+            DB::connection()->getDoctrineSchemaManager()
+                ->getDatabasePlatform()
+                ->registerDoctrineTypeMapping('enum', 'string');
+        });
     }
 }

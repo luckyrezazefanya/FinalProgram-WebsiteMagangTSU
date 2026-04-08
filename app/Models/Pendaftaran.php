@@ -8,10 +8,14 @@ class Pendaftaran extends Model
 {
     protected $table = 'pendaftaran';
     protected $primaryKey = 'id_daftar';
-    
+
 
     protected $fillable = [
-        'nim', 'id_program', 'status', 'jumlah_konversi','cv','transkrip_nilai',
+        'nim',
+        'id_program',
+        'status',
+        'nuptk',
+        'alasan',
     ];
 
     public function mahasiswa()
@@ -22,5 +26,10 @@ class Pendaftaran extends Model
     public function programMagang()
     {
         return $this->belongsTo(ProgramMagang::class, 'id_program');
+    }
+
+    public function dosen()
+    {
+        return $this->belongsTo(Dosen::class, 'nuptk');
     }
 }

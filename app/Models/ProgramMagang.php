@@ -12,9 +12,22 @@ class ProgramMagang extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id_program', 'nama_program', 'jenis_bkp',
-        'id_mitra', 'periode', 'deadline','kuota', 'lokasi_penempatan',
-        'syarat', 'deskripsi_silabus', 'dampak_program'
+        'id_program',
+        'nama_program',
+        'jenis_bkp',
+        'id_mitra',
+        'periode',
+        'deadline',
+        'kuota',
+        'lokasi_penempatan',
+        'syarat',
+        'deskripsi_silabus',
+        'dampak_program',
+        'prodi'
+    ];
+
+    protected $casts = [
+        'prodi' => 'array',
     ];
 
     public function mitra()
@@ -56,4 +69,6 @@ class ProgramMagang extends Model
     {
         return $this->hasMany(UsulanKonversi::class, 'id_program');
     }
+
+
 }
