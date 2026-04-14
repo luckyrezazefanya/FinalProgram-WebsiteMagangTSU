@@ -37,6 +37,8 @@ Route::get('/whoami', function () {
 // Landing page (PUBLIC)
 Route::get('/', fn() => view('layouts.landing'))->name('landing');
 
+Route::get('/loginstaff', fn() => view('auth.admin-login'))->name('loginstaff');
+
 // Guest routes are handled in routes/auth.php
 
 // Semua halaman yang butuh login

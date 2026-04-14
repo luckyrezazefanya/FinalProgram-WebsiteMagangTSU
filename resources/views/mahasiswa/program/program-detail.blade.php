@@ -107,9 +107,12 @@
                 Hanya Mahasiswa
             </button>
         @else
+            @php
+                 $btnDisabled = $isRegistered || (isset($isLimitReached) && $isLimitReached);
+            @endphp
             <button id="btnDaftar" onclick="prosesPendaftaran()"
-                class="fade-up delay-300 {{ $isRegistered ? 'bg-gray-400 cursor-not-allowed' : 'bg-tsu-teal hover:bg-tsu-teal-dark hover:-translate-y-0.5' }} text-white font-bold py-3 px-8 rounded-full flex items-center gap-2 shadow-lg transition transform"
-                {{ $isRegistered ? 'disabled' : '' }}>
+                class="fade-up delay-300 {{ $btnDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-tsu-teal hover:bg-tsu-teal-dark hover:-translate-y-0.5' }} text-white font-bold py-3 px-8 rounded-full flex items-center gap-2 shadow-lg transition transform"
+                {{ $btnDisabled ? 'disabled' : '' }}>
                 <svg id="iconDaftar" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ $isRegistered ? '' : 'rotate-45' }}"
                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     @if($isRegistered)
@@ -119,7 +122,15 @@
                             d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     @endif
                 </svg>
-                <span id="textDaftar">{{ $isRegistered ? 'Sudah Mendaftar' : 'Daftar Sekarang' }}</span>
+                <span id="textDaftar">
+                    @if($isRegistered)
+                        Sudah Mendaftar
+                    @elseif(isset($isLimitReached) && $isLimitReached)
+                        Pendaftaran Maksimal Tercapai
+                    @else
+                        Daftar Sekarang
+                    @endif
+                </span>
             </button>
         @endif
     </div>
@@ -199,6 +210,7 @@
     <script>
         let hasDocuments = @json($hasDocuments);
         let isRegistered = @json($isRegistered);
+        let isLimitReached = @json($isLimitReached ?? false);
 
         function prosesPendaftaran() {
             if (isRegistered) {
@@ -206,6 +218,16 @@
                     icon: 'info',
                     title: 'Anda Sudah Terdaftar',
                     text: 'Anda tidak dapat mendaftar ulang pada program ini.',
+                    confirmButtonColor: '#086375'
+                });
+                return;
+            }
+
+            if (isLimitReached) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Batas Pendaftaran Tercapai',
+                    text: 'Anda hanya dapat mendaftar maksimal 3 program.',
                     confirmButtonColor: '#086375'
                 });
                 return;

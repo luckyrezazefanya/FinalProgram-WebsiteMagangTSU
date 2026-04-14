@@ -75,6 +75,6 @@ class RegisteredUserController extends Controller
         });
 
         return redirect('/login')
-            ->with('success', 'Registrasi berhasil. Silakan cek email untuk verifikasi.');
+            ->with('success', 'Registrasi berhasil. Silakan masuk menggunakan akun Anda.');
     }
 }

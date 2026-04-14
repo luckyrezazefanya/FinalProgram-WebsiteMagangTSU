@@ -74,7 +74,7 @@
                 <h3 class="text-2xl font-black mb-8">Informasi Profil</h3>
 
                 @if($photoRoute)
-                    <form action="{{ $photoRoute }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ $photoRoute }}" method="POST" enctype="multipart/form-data" onsubmit="confirmSubmit(event, 'Apakah Anda yakin ingin memperbarui foto profil Anda?')">
                         @csrf
                 @endif
 
@@ -133,7 +133,7 @@
             <div id="tab-security" class="tab-content hidden">
                 <h3 class="text-2xl font-black mb-8">Ubah Kata Sandi</h3>
 
-                <form action="{{ route('password.update') }}" method="POST" class="max-w-md space-y-5">
+                <form action="{{ route('password.update') }}" method="POST" class="max-w-md space-y-5" onsubmit="confirmSubmit(event, 'Apakah Anda yakin ingin merubah kata sandi akun Anda?')">
                     @csrf
                     @method('PUT')
 
@@ -172,7 +172,7 @@
                     @else
                         <h3 class="text-2xl font-black mb-4">Dokumen Pendukung</h3>
 
-                        <form action="{{ route('documents.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('documents.store') }}" method="POST" enctype="multipart/form-data" onsubmit="confirmSubmit(event, 'Apakah Anda yakin ingin menyimpan perubahan dokumen tersebut?')">
                             @csrf
 
                                 <div class="grid grid-cols-1 gap-8">
@@ -318,11 +318,78 @@
             alert('Nomor WhatsApp berhasil disimpan');
         }
 
+        function confirmSubmit(e, textMsg) {
+            e.preventDefault();
+            const form = e.target;
+            Swal.fire({
+                title: 'Konfirmasi',
+                text: textMsg,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#086375',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Simpan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Menyimpan...',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => { Swal.showLoading() }
+                    });
+                    form.submit();
+                }
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             const hash = window.location.hash.replace('#', '');
             if (hash && document.getElementById('tab-' + hash)) {
                 switchTab(hash);
             }
+
+            // Notifikasi Session SweetAlert
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#086375'
+                });
+            @endif
+
+            @if(session('status') == 'password-updated')
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "Kata sandi Anda berhasil diperbarui.",
+                    confirmButtonColor: '#086375'
+                });
+            @elseif(session('status'))
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "{{ session('status') }}",
+                    confirmButtonColor: '#086375'
+                });
+            @endif
+
+            @if($errors->updatePassword->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Memperbarui Sandi!',
+                    text: "{{ $errors->updatePassword->first() }}",
+                    confirmButtonColor: '#d33'
+                });
+            @elseif($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: "{{ $errors->first() }}",
+                    confirmButtonColor: '#d33'
+                });
+            @endif
         });
     </script>
 

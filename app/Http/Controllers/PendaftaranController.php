@@ -31,6 +31,15 @@ class PendaftaranController extends Controller
 
         $nim = $user->mahasiswa->nim;
 
+        $jumlahPendaftaran = Pendaftaran::where('nim', $nim)->count();
+
+        if ($jumlahPendaftaran >= 3) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda hanya dapat mendaftar maksimal 3 program'
+            ], 403);
+        }
+
         $sudahDaftar = Pendaftaran::where('nim', $nim)
             ->where('id_program', $request->program_id)
             ->exists();

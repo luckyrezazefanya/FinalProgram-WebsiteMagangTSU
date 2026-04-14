@@ -91,8 +91,9 @@
                     <p class="text-gray-500">Gunakan akun @tsu.ac.id untuk masuk ke sistem.</p>
                 </div>
 
-                <form x-data="{ show: false, password: '' }" action="{{ route('login') }}" method="POST" class="space-y-6 animate-fade-in-up delay-300 opacity-0" style="animation-fill-mode: forwards;">
+                <form id="form-login" x-data="{ show: false, password: '' }" action="{{ route('login') }}" method="POST" class="space-y-6 animate-fade-in-up delay-300 opacity-0" style="animation-fill-mode: forwards;">
                     @csrf
+                    <input type="hidden" name="login_type" value="mahasiswa">
                     <div>
                         <label class="block text-gray-700 font-semibold text-sm mb-2">Alamat Email</label>
                         <div class="relative group">
@@ -165,5 +166,104 @@
             </div>
         </div>
     </div>
+
+    <!-- Sweet Alert Handling -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // Handle form submit using AJAX
+            const loginForm = document.getElementById('form-login');
+            if(loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault(); // Stop normal redirection
+                    
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn.innerText;
+                    submitBtn.innerText = 'Memproses...';
+                    submitBtn.disabled = true;
+
+                    try {
+                        const response = await fetch(this.action, {
+                            method: 'POST',
+                            body: new FormData(this),
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest', // Force JSON response for errors
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Login Berhasil!',
+                                text: 'Mengarahkan ke dashboard...',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                timerProgressBar: true,
+                                didClose: () => {
+                                    window.location.href = data.redirect;
+                                }
+                            });
+                        } else if (response.status === 422) {
+                            // Validasi Error (email / password salah)
+                            const firstError = Object.values(data.errors)[0][0] || 'Email atau kata sandi Anda salah.';
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Login Gagal!',
+                                text: firstError,
+                                confirmButtonColor: '#086375',
+                                confirmButtonText: 'Coba Lagi'
+                            });
+                            submitBtn.innerText = originalBtnText;
+                            submitBtn.disabled = false;
+                        } else {
+                            throw new Error('Server response was not ok');
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Gagal terhubung ke server atau terjadi kesalahan.',
+                            confirmButtonColor: '#086375'
+                        });
+                        submitBtn.innerText = originalBtnText;
+                        submitBtn.disabled = false;
+                    }
+                });
+            }
+
+            // Fallback for session-based messages
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            @endif
+
+            @if ($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan!',
+                    text: "{{ $errors->first() }}",
+                    confirmButtonColor: '#086375',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+
+            @if (session('status'))
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Pemberitahuan',
+                    text: "{{ session('status') }}",
+                    confirmButtonColor: '#086375'
+                });
+            @endif
+        });
+    </script>
 </body>
 </html>

@@ -39,8 +39,19 @@ class PendaftaranController extends Controller
                     : null
             ]);
 
+            // Jika status diterima, tolak otomatis pendaftaran lain dari mahasiswa ini
+            if ($request->status === 'diterima') {
+                Pendaftaran::where('nim', $pendaftaran->nim)
+                    ->where('id_daftar', '!=', $pendaftaran->id_daftar)
+                    ->where('status', 'menunggu')
+                    ->update([
+                        'status' => 'ditolak',
+                        'alasan' => 'Ditolak secara sistem karena Anda telah diterima di program magang lain.'
+                    ]);
+            }
+
             $message = $request->status === 'diterima'
-                ? 'Mahasiswa berhasil diloloskan.'
+                ? 'Mahasiswa berhasil diloloskan. Pendaftaran lainnya otomatis ditolak.'
                 : 'Pendaftaran mahasiswa ditolak.';
 
             return response()->json([

@@ -27,6 +27,7 @@ class ProgramMagangTampilController extends Controller
 
         $hasDocuments = false;
         $isRegistered = false;
+        $isLimitReached = false;
 
         if ($user && $user->role === 'mahasiswa' && $user->mahasiswa) {
             $berkas = BerkasMahasiswa::where('user_id', $user->id)->first();
@@ -37,8 +38,10 @@ class ProgramMagangTampilController extends Controller
                 ->where('id_program', $program->id_program)
                 ->exists();
 
+            $jumlahPendaftaran = Pendaftaran::where('nim', $user->mahasiswa->nim)->count();
+            $isLimitReached = $jumlahPendaftaran >= 3;
         }
-        return view('mahasiswa.program.program-detail', compact('program', 'hasDocuments', 'isRegistered'));
+        return view('mahasiswa.program.program-detail', compact('program', 'hasDocuments', 'isRegistered', 'isLimitReached'));
     }
 
 }

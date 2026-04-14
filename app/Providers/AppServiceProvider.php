@@ -23,14 +23,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Password::defaults(function () {
-            return Password::min(10)
-                ->mixedCase()   // huruf besar + kecil
-                ->numbers()     // angka
-                ->symbols();    // simbol
-
-            DB::connection()->getDoctrineSchemaManager()
-                ->getDatabasePlatform()
-                ->registerDoctrineTypeMapping('enum', 'string');
+            // Kita turunkan aturan sementara agar mudah diubah (misal min 8) atau pertahankan jika ingin ketat
+            return Password::min(8)
+            ->mixedCase()
+            ->numbers();
         });
+
+        // Pindahkan registrasi enum DB keluar dari closure Password::defaults
+        DB::connection()->getDoctrineSchemaManager()
+            ->getDatabasePlatform()
+            ->registerDoctrineTypeMapping('enum', 'string');
     }
 }

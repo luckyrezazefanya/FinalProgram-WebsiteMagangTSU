@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Penilaian Magang')
-@section('header_title', 'Penilaian Mahasiswa')
+@section('title', 'Usulan Konversi')
+@section('header_title', 'Usulan Konversi')
 @section('content')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -313,7 +313,7 @@
                 <div class="no-print space-y-6 mb-12 max-w-5xl mx-auto">
                     <div class="flex items-center gap-4 px-2">
                         <div class="h-6 w-1.5 bg-tsu-teal rounded-full"></div>
-                        <h3 class="text-xl font-black text-slate-800 tracking-tight">Upload Berkas Akhir Magang</h3>
+                        <h3 class="text-xl font-black text-slate-800 tracking-tight">Upload Formulir Pengajuan Konversi</h3>
                     </div>
 
                     <div class="w-full">
@@ -331,10 +331,8 @@
                                     </svg>
                                 </div>
                                 <div class="mt-4 text-center">
-                                    <p class="text-lg font-black text-tsu-teal" id="uploadBtnText">Upload File
-                                        Magang</p>
-                                    <p class="text-xs font-semibold text-slate-400 mt-2 tracking-tight">Sertifikat dan Nilai
-                                        Pendukung Magang (Maks 2 PDF)</p>
+                                    <p class="text-lg font-black text-tsu-teal" id="uploadBtnText">Upload Formulir</p>
+                                    <p class="text-xs font-semibold text-slate-400 mt-2 tracking-tight"> Upload formulir yang telah ditandatangani Kaprodi </p>
                                 </div>
                             </div>
                         </div>

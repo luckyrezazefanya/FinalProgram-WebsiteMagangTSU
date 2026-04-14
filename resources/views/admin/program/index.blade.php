@@ -268,10 +268,10 @@
                             placeholder="Deskripsi silabus..."></textarea>
                     </div>
                     <div class="col-span-2">
-                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">🎯 Dampak Program</label>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">🎯 Capaian Pembelajaran</label>
                         <textarea name="dampak_program" x-model="formData.dampak_program" rows="2"
                             class="w-full bg-gray-50 border-2 border-transparent rounded-2xl py-3.5 px-5 focus:border-tsu-teal focus:bg-white mt-2 outline-none font-bold text-gray-700 transition"
-                            placeholder="Dampak yang diharapkan..."></textarea>
+                            placeholder="Capaian pembelajaran yang diharapkan..."></textarea>
                     </div>
                 </div>
 
