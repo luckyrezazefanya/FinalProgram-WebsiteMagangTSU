@@ -20,7 +20,7 @@ use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\MataKuliahController;
 use App\Http\Controllers\MahasiswaPenilaianController;
 use App\Http\Controllers\Admin\PendaftaranController as AdminPendaftaranController;
-
+use App\Http\Controllers\Admin\UserController;
 
 use App\Models\Pengumuman;
 
@@ -209,6 +209,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/admin/pengumuman/{id}', [PengumumanController::class, 'destroy'])->name('admin.pengumuman.destroy');
     Route::get('/konversi', [\App\Http\Controllers\Admin\AdminKonversiController::class, 'index'])->name('admin.konversi.index');
     Route::post('/admin/konversi/{nim}/validasi', [\App\Http\Controllers\Admin\AdminKonversiController::class, 'validasi'])->name('admin.konversi.validasi');
+
+    Route::get('/admin/user', [UserController::class, 'index'])->name('admin.user.index');
+    Route::post('/admin/user', [UserController::class, 'store'])->name('admin.user.store');
+    Route::put('/admin/user/{id}', [UserController::class, 'update'])->name('admin.user.update');
+    Route::delete('/admin/user/{id}', [UserController::class, 'destroy'])->name('admin.user.destroy');
 });
 
 
