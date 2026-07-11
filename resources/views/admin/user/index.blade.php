@@ -8,12 +8,15 @@
                         addModal: false, 
                         editModal: false, 
                         newRole: 'admin_super',
-                        editData: { id: '', name: '', email: '', role: '' },
+                        editData: { id: '', name: '', email: '', role: '', nim: '', nuptk: '', prodi: '' },
                         openEdit(user) {
                             this.editData.id = user.id;
                             this.editData.name = user.name;
                             this.editData.email = user.email;
                             this.editData.role = user.role;
+                            this.editData.nim = user.mahasiswa ? user.mahasiswa.nim : '';
+                            this.editData.nuptk = user.dosen ? user.dosen.nuptk : '';
+                            this.editData.prodi = user.mahasiswa ? user.mahasiswa.prodi : '';
                             this.editModal = true;
                         }
                     }">
@@ -142,9 +145,20 @@
                         <label class="block text-sm font-bold text-gray-700 mb-1"
                             x-text="newRole === 'mahasiswa' ? 'NIM' : 'NUPTK'"></label>
 
-                        <input x-show="newRole === 'mahasiswa'" type="text" name="nim" value="{{ old('nim') }}"
-                            placeholder="2243XXXX" :required="newRole === 'mahasiswa'"
-                            class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none">
+                        <div x-show="newRole === 'mahasiswa'" class="space-y-3">
+                            <input type="text" name="nim" value="{{ old('nim') }}"
+                                placeholder="2243XXXX" :required="newRole === 'mahasiswa'"
+                                class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none">
+
+                            <select name="prodi" :required="newRole === 'mahasiswa'"
+                                class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none">
+                                <option value="">Pilih Program Studi</option>
+                                <option value="informatika">Informatika</option>
+                                <option value="sistem_informasi">Sistem Informasi</option>
+                                <option value="teknik_komputer">Teknik Komputer</option>
+                                <option value="rekayasa_perangkat_lunak">Rekayasa Perangkat Lunak</option>
+                            </select>
+                        </div>
 
                         <input x-show="newRole === 'dosen'" type="text" name="nuptk" value="{{ old('nuptk') }}"
                             placeholder="0612XXXX" :required="newRole === 'dosen'"
@@ -178,11 +192,22 @@
                         <label class="block text-sm font-bold text-gray-700 mb-1"
                             x-text="editData.role === 'mahasiswa' ? 'NIM' : 'NUPTK'"></label>
 
-                        <input x-show="editData.role === 'mahasiswa'" type="text" name="nim" placeholder="2243XXXX"
-                            :required="editData.role === 'mahasiswa'"
-                            class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none">
+                        <div x-show="editData.role === 'mahasiswa'" class="space-y-3">
+                            <input type="text" name="nim" placeholder="2243XXXX" x-model="editData.nim"
+                                :required="editData.role === 'mahasiswa'"
+                                class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none">
 
-                        <input x-show="editData.role === 'dosen'" type="text" name="nuptk" placeholder="0612XXXX"
+                            <select name="prodi" x-model="editData.prodi" :required="editData.role === 'mahasiswa'"
+                                class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none">
+                                <option value="">Pilih Program Studi</option>
+                                <option value="informatika">Informatika</option>
+                                <option value="sistem_informasi">Sistem Informasi</option>
+                                <option value="teknik_komputer">Teknik Komputer</option>
+                                <option value="rekayasa_perangkat_lunak">Rekayasa Perangkat Lunak</option>
+                            </select>
+                        </div>
+
+                        <input x-show="editData.role === 'dosen'" type="text" name="nuptk" placeholder="0612XXXX" x-model="editData.nuptk"
                             :required="editData.role === 'dosen'"
                             class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none"
                             style="display: none;">
