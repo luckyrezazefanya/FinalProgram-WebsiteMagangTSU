@@ -184,6 +184,8 @@ Route::middleware(['auth', 'role:admin_universitas|admin_fakultas|admin_prodi|ad
 
     Route::get('/admin/mahasiswa', [DataMahasiswaController::class, 'index'])
         ->name('admin.mahasiswa.index');
+    Route::get('/admin/mahasiswa/export', [DataMahasiswaController::class, 'export'])
+        ->name('admin.mahasiswa.export');
     Route::get('/konversi', [\App\Http\Controllers\Admin\AdminKonversiController::class, 'index'])->name('admin.konversi.index');
     Route::post('/admin/konversi/{nim}/validasi', [\App\Http\Controllers\Admin\AdminKonversiController::class, 'validasi'])->name('admin.konversi.validasi');
 
