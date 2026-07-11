@@ -7,6 +7,7 @@
     <div class="space-y-6" x-data="{ 
                 addModal: false, 
                 editModal: false, 
+                newRole: 'admin_super',
                 editData: { id: '', name: '', email: '', role: '' },
                 openEdit(user) {
                     this.editData.id = user.id;
@@ -114,7 +115,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Role</label>
-                        <select name="role" required
+                        <select name="role" x-model="newRole" required
                             class="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 focus:ring-2 focus:ring-tsu-teal outline-none">
                             <option value="admin_super">Super Admin</option>
                             <option value="admin_fakultas">Admin Fakultas</option>
@@ -123,6 +124,19 @@
                             <option value="dosen">Dosen</option>
                             <option value="mahasiswa">Mahasiswa</option>
                         </select>
+                    </div>
+                    
+                    <div x-show="newRole === 'mahasiswa' || newRole === 'dosen'" class="mt-4" x-cloak>
+                        <label class="block text-sm font-bold text-gray-700 mb-1" x-text="newRole === 'mahasiswa' ? 'NIM' : 'NUPTK'"></label>
+                        
+                        <input x-show="newRole === 'mahasiswa'" type="text" name="nim" value="{{ old('nim') }}"
+                            placeholder="2243XXXX" :required="newRole === 'mahasiswa'"
+                            class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none">
+
+                        <input x-show="newRole === 'dosen'" type="text" name="nuptk" value="{{ old('nuptk') }}"
+                            placeholder="0612XXXX" :required="newRole === 'dosen'"
+                            class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none"
+                            style="display: none;">
                     </div>
                     <div class="flex gap-4 mt-6">
                         <button type="button" @click="addModal = false"
@@ -168,6 +182,19 @@
                             <option value="dosen">Dosen</option>
                             <option value="mahasiswa">Mahasiswa</option>
                         </select>
+                    </div>
+
+                    <div x-show="editData.role === 'mahasiswa' || editData.role === 'dosen'" class="mt-4" x-cloak>
+                        <label class="block text-sm font-bold text-gray-700 mb-1" x-text="editData.role === 'mahasiswa' ? 'NIM' : 'NUPTK'"></label>
+                        
+                        <input x-show="editData.role === 'mahasiswa'" type="text" name="nim"
+                            placeholder="2243XXXX" :required="editData.role === 'mahasiswa'"
+                            class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none">
+
+                        <input x-show="editData.role === 'dosen'" type="text" name="nuptk"
+                            placeholder="0612XXXX" :required="editData.role === 'dosen'"
+                            class="w-full bg-gray-50 border border-gray-200 px-4 py-3.5 rounded-2xl text-sm focus:bg-white focus:border-tsu-teal focus:ring-4 focus:ring-tsu-teal/10 outline-none"
+                            style="display: none;">
                     </div>
                     <div class="flex gap-4 mt-6">
                         <button type="button" @click="editModal = false"
