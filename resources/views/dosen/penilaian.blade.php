@@ -56,7 +56,7 @@
                     <tbody class="divide-y divide-gray-50">
                         @forelse ($mahasiswa as $mhs)
                             @php
-                                $status = $mhs->penilaian ? 'sudah-dinilai' : 'perlu-dinilai';
+                                $status = $mhs->status_penilaian ?? 'tunggu-dokumen';
 
                                 $namePieces = explode(' ', $mhs->user->name ?? '');
                                 $initials = '';
@@ -65,12 +65,14 @@
                                 }
                                 if (empty($initials))
                                     $initials = '-';
+                                    
+                                $avatarClass = $status == 'sudah-dinilai' ? 'bg-green-50 text-green-600' : 'bg-tsu-teal/10 text-tsu-teal';
                             @endphp
                             <tr class="hover:bg-gray-50/50 transition mhs-row" data-status="{{ $status }}">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="w-10 h-10 rounded-full {{ $mhs->penilaian ? 'bg-green-50 text-green-600' : 'bg-tsu-teal/10 text-tsu-teal' }} flex items-center justify-center font-bold">
+                                            class="w-10 h-10 rounded-full {{ $avatarClass }} flex items-center justify-center font-bold">
                                             {{ $initials }}</div>
                                         <div>
                                             <p class="font-bold text-sm text-gray-800">{{ $mhs->user->name ?? '-' }}</p>
@@ -79,31 +81,38 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm font-medium text-gray-600">
-                                    {{ $mhs->programMagang->nama_program ?? '-' }}</td>
-                                <td class="px-6 py-4 text-[10px]">
-                                    <button class="p-1.5 bg-red-50 text-red-500 rounded-lg font-bold">📄 Sertif</button>
-                                    <button class="p-1.5 bg-blue-50 text-blue-500 rounded-lg font-bold">📊 Nilai</button>
+                                    {{ $mhs->pendaftaran->where('status', 'diterima')->first()->programMagang->nama_program ?? '-' }}</td>
+                                <td class="px-6 py-4 text-[10px] flex gap-2">
+                                    @if($mhs->user && $mhs->user->berkas && $mhs->user->berkas->sertifikat_magang)
+                                        <a href="{{ asset('storage/' . $mhs->user->berkas->sertifikat_magang) }}" target="_blank" class="p-1.5 bg-red-50 text-red-500 rounded-lg font-bold block transition hover:bg-red-100">📄 Sertif</a>
+                                    @else
+                                        <button disabled class="p-1.5 bg-gray-50 text-gray-400 rounded-lg font-bold cursor-not-allowed" title="Sertifikat Belum Diunggah">📄 Sertif</button>
+                                    @endif
+                                    
+                                    @if($status != 'tunggu-dokumen')
+                                        <button onclick="openModal('{{ $mhs->user->name ?? '-' }}', '{{ $mhs->nim }}', {{ $status == 'sudah-dinilai' ? 'true' : 'false' }}, this.closest('tr').querySelector('.action-btn'))" class="p-1.5 bg-blue-50 text-blue-500 rounded-lg font-bold transition hover:bg-blue-100">📊 Nilai</button>
+                                    @else
+                                        <button disabled class="p-1.5 bg-gray-50 text-gray-400 rounded-lg font-bold cursor-not-allowed">📊 Nilai</button>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    @if($mhs->penilaian)
-                                        <span
-                                            class="status-badge px-3 py-1 bg-green-100 text-green-600 text-[10px] font-bold rounded-full uppercase">Sudah
-                                            Dinilai</span>
+                                    @if($status == 'sudah-dinilai')
+                                        <span class="status-badge px-3 py-1 bg-green-100 text-green-600 text-[10px] font-bold rounded-full uppercase">Sudah Dinilai</span>
+                                    @elseif($status == 'perlu-dinilai')
+                                        <span class="status-badge px-3 py-1 bg-orange-100 text-orange-600 text-[10px] font-bold rounded-full uppercase">Perlu Dinilai</span>
                                     @else
-                                        <span
-                                            class="status-badge px-3 py-1 bg-orange-100 text-orange-600 text-[10px] font-bold rounded-full uppercase">Perlu
-                                            Dinilai</span>
+                                        <span class="status-badge px-3 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-full uppercase">Tunggu Dokumen</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    @if($mhs->penilaian)
+                                    @if($status == 'sudah-dinilai')
                                         <button onclick="openModal('{{ $mhs->user->name ?? '-' }}', '{{ $mhs->nim }}', true, this)"
-                                            class="action-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-200">Edit
-                                            Nilai</button>
-                                    @else
+                                            class="action-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-200">Edit Nilai</button>
+                                    @elseif($status == 'perlu-dinilai')
                                         <button onclick="openModal('{{ $mhs->user->name ?? '-' }}', '{{ $mhs->nim }}', false, this)"
-                                            class="action-btn bg-tsu-teal text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-tsu-teal-dark shadow-lg shadow-tsu-teal/20">Input
-                                            Nilai</button>
+                                            class="action-btn bg-tsu-teal text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-tsu-teal-dark shadow-lg shadow-tsu-teal/20">Input Nilai</button>
+                                    @else
+                                        <span class="text-xs text-gray-400 italic">Menunggu Pengajuan</span>
                                     @endif
                                 </td>
                             </tr>
@@ -135,48 +144,18 @@
 
             <form id="formPenilaian" onsubmit="handleSave(event)" class="p-8">
                 <input type="hidden" name="nim" id="mhsNimInput" value="">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-8 overflow-y-auto max-h-[50vh] pr-2">
-                    @php
-                        $mkData = [
-                            ['code' => 'IF201', 'name' => 'Workshop Framework', 'sks' => 4],
-                            ['code' => 'IF202', 'name' => 'Manajemen Proyek SI', 'sks' => 3],
-                            ['code' => 'IF203', 'name' => 'Etika Profesi IT', 'sks' => 2],
-                            ['code' => 'IF204', 'name' => 'Keamanan Informasi', 'sks' => 3],
-                            ['code' => 'IF205', 'name' => 'Cloud Computing', 'sks' => 3],
-                            ['code' => 'IF206', 'name' => 'Data Science Dasar', 'sks' => 3],
-                            ['code' => 'IF207', 'name' => 'Mobile Programming', 'sks' => 4],
-                            ['code' => 'IF208', 'name' => 'Bahasa Inggris Teknis', 'sks' => 2],
-                        ];
-                    @endphp
-
-                    @foreach($mkData as $index => $mk)
-                        <div class="flex items-center gap-4 bg-gray-50/50 p-4 rounded-3xl border border-gray-100">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span
-                                        class="text-[10px] font-extrabold bg-tsu-teal text-white px-2 py-0.5 rounded">{{ $mk['code'] }}</span>
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{{ $mk['sks'] }}
-                                        SKS</span>
-                                </div>
-                                <h4 class="text-sm font-bold text-gray-700 leading-tight">{{ $mk['name'] }}</h4>
-                                <input type="hidden" name="mk_code[{{ $index }}]" value="{{ $mk['code'] }}">
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <input type="number" oninput="calculateGrade(this)" name="nilai[{{ $index }}]" required min="0"
-                                    max="100" placeholder="0"
-                                    class="w-20 bg-white border-2 border-gray-100 rounded-2xl text-center font-bold text-tsu-teal focus:border-tsu-teal focus:ring-0 py-2">
-                                <div
-                                    class="grade-box w-10 h-10 flex items-center justify-center bg-white border-2 border-gray-100 rounded-xl font-black text-sm text-gray-300">
-                                    -</div>
-                            </div>
-                        </div>
-                    @endforeach
+                <div id="warningContainer" class="hidden mb-6 p-6 bg-orange-50 border border-orange-100 rounded-2xl text-orange-600 text-center font-medium">
+                    Mahasiswa belum mengajukan mata kuliah untuk dikonversi. Harap menunggu pengajuan.
+                </div>
+                
+                <div id="mkContainer" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-8 overflow-y-auto max-h-[50vh] pr-2">
+                    <!-- MK will be loaded dynamically via fetch -->
                 </div>
 
                 <div class="flex gap-4">
                     <button type="button" onclick="closeModal()"
                         class="flex-1 py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl hover:bg-gray-200 transition">Batal</button>
-                    <button type="submit"
+                    <button type="submit" id="btnSimpanNilai"
                         class="flex-[2] py-4 bg-tsu-teal text-white font-bold rounded-2xl hover:bg-tsu-teal-dark transition shadow-xl shadow-tsu-teal/30">Simpan
                         Seluruh Nilai</button>
                 </div>
@@ -221,15 +200,56 @@
             document.getElementById('mhsNamePlaceholder').innerText = 'Mahasiswa: ' + name;
             document.getElementById('mhsNimInput').value = nim;
 
-            const inputs = document.querySelectorAll('#formPenilaian input[type="number"]');
-            inputs.forEach(input => {
-                input.value = isEdit ? Math.floor(Math.random() * 10) + 85 : "";
-                calculateGrade(input);
-            });
+            const mkContainer = document.getElementById('mkContainer');
+            const warningContainer = document.getElementById('warningContainer');
+            const btnSimpan = document.getElementById('btnSimpanNilai');
+            
+            mkContainer.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10">Memuat data mata kuliah...</div>';
+            warningContainer.classList.add('hidden');
+            btnSimpan.classList.remove('hidden');
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             setTimeout(() => modal.querySelector('div').classList.replace('scale-95', 'scale-100'), 10);
+
+            fetch(`/dosen/penilaian/${nim}/data`)
+                .then(res => res.json())
+                .then(data => {
+                    mkContainer.innerHTML = '';
+                    if(data.length === 0) {
+                        warningContainer.classList.remove('hidden');
+                        btnSimpan.classList.add('hidden');
+                        return;
+                    }
+
+                    data.forEach((mk, index) => {
+                        const mkData = mk.mata_kuliah || {};
+                        const nilaiStr = mk.nilai !== null ? mk.nilai : '';
+                        const mkHtml = `
+                        <div class="flex items-center gap-4 bg-gray-50/50 p-4 rounded-3xl border border-gray-100">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-[10px] font-extrabold bg-tsu-teal text-white px-2 py-0.5 rounded">${mkData.kode_mk || mk.kode_mk}</span>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">${mkData.sks || '-'} SKS</span>
+                                </div>
+                                <h4 class="text-sm font-bold text-gray-700 leading-tight">${mkData.nama_matkul || '-'}</h4>
+                                <input type="hidden" name="mk_code[]" value="${mk.kode_mk}">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" oninput="calculateGrade(this)" name="nilai[]" value="${nilaiStr}" required min="0"
+                                    max="100" placeholder="0"
+                                    class="w-20 bg-white border-2 border-gray-100 rounded-2xl text-center font-bold text-tsu-teal focus:border-tsu-teal focus:ring-0 py-2">
+                                <div class="grade-box w-10 h-10 flex items-center justify-center border-2 border-gray-100 bg-white rounded-xl font-black text-sm text-gray-300">-</div>
+                            </div>
+                        </div>`;
+                        mkContainer.innerHTML += mkHtml;
+                    });
+                    
+                    document.querySelectorAll('#formPenilaian input[type="number"]').forEach(input => calculateGrade(input));
+                })
+                .catch(err => {
+                    mkContainer.innerHTML = '<div class="col-span-full text-center text-red-500 py-10">Gagal memuat data.</div>';
+                });
         }
 
         function closeModal() {
@@ -241,35 +261,35 @@
         function handleSave(e) {
             e.preventDefault();
 
-            // Disini anda dapat menambahkan AJAX (fetch/axios) untuk mengirim data formPenilaian ke backend
+            const form = document.getElementById('formPenilaian');
+            const formData = new FormData(form);
 
-            if (selectedBtn) {
-                const row = selectedBtn.closest('tr');
-
-                const badge = row.querySelector('.status-badge');
-                badge.innerText = "Sudah Dinilai";
-                badge.className = "status-badge px-3 py-1 bg-green-100 text-green-600 text-[10px] font-bold rounded-full uppercase";
-
-                selectedBtn.innerText = "Edit Nilai";
-                selectedBtn.className = "action-btn bg-gray-100 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-200 transition";
-                selectedBtn.onclick = function () { openModal(currentMhs, currentNim, true, this); };
-
-                row.setAttribute('data-status', 'sudah-dinilai');
-
-                const avatar = row.querySelector('.rounded-full');
-                if (avatar) {
-                    avatar.className = "w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center font-bold";
+            fetch(`/dosen/penilaian/${currentNim}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: 'Nilai mahasiswa ' + currentMhs + ' telah disimpan.',
+                        icon: 'success',
+                        confirmButtonColor: '#086375'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', 'Gagal menyimpan nilai.', 'error');
                 }
-            }
-
-            Swal.fire({
-                title: 'Berhasil!',
-                text: 'Nilai mahasiswa ' + currentMhs + ' telah disimulasikan sebagai tersimpan.',
-                icon: 'success',
-                confirmButtonColor: '#086375'
-            }).then(() => {
-                closeModal();
-                updateStats();
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
             });
         }
 

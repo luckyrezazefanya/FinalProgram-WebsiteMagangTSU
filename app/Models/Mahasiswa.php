@@ -69,6 +69,11 @@ class Mahasiswa extends Model
         return $this->hasMany(KonversiMk::class, 'nim', 'nim');
     }
 
+    public function konversiMk()
+    {
+        return $this->hasMany(KonversiMk::class, 'nim', 'nim');
+    }
+
     public function programMagang()
     {
         return $this->belongsTo(ProgramMagang::class, 'id_program', 'id_program');

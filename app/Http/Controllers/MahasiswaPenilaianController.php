@@ -8,6 +8,25 @@ use App\Models\BerkasMahasiswa;
 
 class MahasiswaPenilaianController extends Controller
 {
+    public function index()
+    {
+        $user = auth()->user();
+        $mahasiswa = $user->mahasiswa;
+
+        if (!$mahasiswa) {
+            return redirect()->route('dashboard')->with('error', 'Data mahasiswa tidak ditemukan.');
+        }
+
+        $pendaftaran = \App\Models\Pendaftaran::where('nim', $mahasiswa->nim)
+            ->whereIn('status', ['Diterima', 'Disetujui', 'diterima', 'disetujui'])
+            ->first();
+            
+        $pembimbing = \App\Models\Pembimbing::with('dosen.user')->where('nim', $mahasiswa->nim)->first();
+        $penilaian = \App\Models\Penilaian::where('nim', $mahasiswa->nim)->first();
+
+        return view('mahasiswa.penilaian.penilaian', compact('pendaftaran', 'pembimbing', 'penilaian'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([

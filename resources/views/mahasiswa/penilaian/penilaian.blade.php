@@ -156,13 +156,23 @@
                         <h3 class="text-slate-400 font-black text-xs uppercase tracking-widest mb-2">Nilai Akhir Akademik
                         </h3>
                         <div class="flex items-baseline gap-1">
-                            <span
-                                class="text-8xl font-black text-tsu-teal tracking-tighter group-hover:scale-110 transition-transform duration-500">85</span>
-                            <span class="text-2xl font-black text-tsu-teal">/100</span>
+                            @if(!$pendaftaran)
+                                <div class="text-center mt-2 mb-2">
+                                    <span
+                                        class="text-sm font-bold text-amber-500 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">Belum
+                                        mendaftar program</span>
+                                </div>
+                            @else
+                                <span
+                                    class="text-8xl font-black text-tsu-teal tracking-tighter group-hover:scale-110 transition-transform duration-500">{{ $penilaian ? $penilaian->nilai_angka : '-' }}</span>
+                                <span class="text-2xl font-black text-tsu-teal">/100</span>
+                            @endif
                         </div>
-                        <p class="text-slate-500 mt-4 font-bold text-xs text-center leading-relaxed">Wawan Laksito,
-                            M.M.<br><span class="text-[10px] text-slate-300 font-medium tracking-wide uppercase">Dosen
-                                Pembimbing</span></p>
+                        <p class="text-slate-500 mt-4 font-bold text-xs text-center leading-relaxed">
+                            {{ $pembimbing && $pembimbing->dosen && $pembimbing->dosen->user ? $pembimbing->dosen->user->name : 'Belum ada dosen pembimbing' }}<br>
+                            <span class="text-[10px] text-slate-300 font-medium tracking-wide uppercase">Dosen
+                                Pembimbing</span>
+                        </p>
                     </div>
 
                     <div
@@ -185,7 +195,7 @@
 
                         <div class="mt-6 pt-4 border-t border-white/10 flex justify-between items-center">
                             <span class="text-[10px] font-black uppercase tracking-widest text-tsu-teal">Catatan
-                                Dosen</span>
+                            </span>
                             <span class="text-[10px] text-slate-500 font-bold tracking-widest">VERIFIED</span>
                         </div>
                     </div>
@@ -332,7 +342,8 @@
                                 </div>
                                 <div class="mt-4 text-center">
                                     <p class="text-lg font-black text-tsu-teal" id="uploadBtnText">Upload Formulir</p>
-                                    <p class="text-xs font-semibold text-slate-400 mt-2 tracking-tight"> Upload formulir yang telah ditandatangani Kaprodi </p>
+                                    <p class="text-xs font-semibold text-slate-400 mt-2 tracking-tight"> Upload formulir yang
+                                        telah ditandatangani Kaprodi </p>
                                 </div>
                             </div>
                         </div>
@@ -468,20 +479,20 @@
 
             Array.from(files).forEach((file) => {
                 container.innerHTML += `
-                                <div class="bg-white border border-gray-200 p-4 rounded-2xl shadow-sm flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="bg-red-50 text-red-500 p-2 rounded-lg">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                            </svg>
-                                        </div>
-                                        <div class="overflow-hidden">
-                                            <p class="text-sm font-bold text-gray-800 truncate w-[14rem] sm:w-[16rem]">${file.name}</p>
-                                            <p class="text-[10px] text-green-600 font-bold uppercase tracking-wider mt-1">Siap Dikirim</p>
+                                    <div class="bg-white border border-gray-200 p-4 rounded-2xl shadow-sm flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="bg-red-50 text-red-500 p-2 rounded-lg">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <div class="overflow-hidden">
+                                                <p class="text-sm font-bold text-gray-800 truncate w-[14rem] sm:w-[16rem]">${file.name}</p>
+                                                <p class="text-[10px] text-green-600 font-bold uppercase tracking-wider mt-1">Siap Dikirim</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            `;
+                                `;
             });
             btnText.innerText = "Ganti File Magang";
             Swal.fire({ title: 'Berhasil!', text: files.length + ' file dipilih.', icon: 'success', timer: 1000, showConfirmButton: false });

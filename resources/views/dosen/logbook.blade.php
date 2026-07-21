@@ -193,13 +193,10 @@
             if (log.status_validasi === 'pending') {
                 actionButtons = `
                                     <div class="flex gap-2 shrink-0 action-area">
-                                        <form method="POST" action="/dosen/logbook/${log.id_logbook}/validasi">
-                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                            <input type="hidden" name="status" value="disetujui">
-                                            <button class="bg-tsu-teal text-white px-5 py-2 rounded-xl text-xs font-bold hover:bg-tsu-teal-dark transition">
-                                                Validasi
-                                            </button>
-                                        </form>
+                                        <button onclick="approveAction(this, ${log.id_logbook})"
+                                            class="bg-tsu-teal text-white px-5 py-2 rounded-xl text-xs font-bold hover:bg-tsu-teal-dark transition">
+                                            Validasi
+                                        </button>
 
                                         <button onclick="rejectAction(this, ${log.id_logbook})" 
                                             class="bg-white border border-red-200 text-red-500 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-red-50 transition">
@@ -236,6 +233,56 @@
             document.getElementById('modalDetail').classList.add('hidden');
         }
 
+        function approveAction(btn, id) {
+            Swal.fire({
+                title: 'Validasi Logbook?',
+                text: "Anda yakin ingin menyetujui logbook ini?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0d9488',
+                confirmButtonText: 'Ya, Setujui',
+                cancelButtonText: 'Batal',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return fetch(`/dosen/logbook/${id}/validasi`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ status: 'disetujui' })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Request failed: ${error}`);
+                        });
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const actionArea = btn.closest('.action-area');
+                    actionArea.innerHTML = '<span class="text-green-600 font-bold flex items-center gap-1 text-sm">✅ Disetujui</span>';
+                    
+                    pendingCount--;
+                    successCount++;
+                    document.getElementById('count-pending').innerText = pendingCount;
+                    document.getElementById('count-success').innerText = successCount;
+
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: 'Logbook telah disetujui.',
+                        icon: 'success'
+                    });
+                }
+            });
+        }
+
         function rejectAction(btn, id) {
             Swal.fire({
                 title: 'Tolak Logbook?',
@@ -258,7 +305,8 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify({ alasan: reason })
                     })
@@ -266,7 +314,7 @@
                             if (!response.ok) {
                                 throw new Error(response.statusText);
                             }
-                            return response; // No json response expected effectively based on controller back()
+                            return response.json();
                         })
                         .catch(error => {
                             Swal.showValidationMessage(
@@ -279,14 +327,16 @@
                 if (result.isConfirmed) {
                     const actionArea = btn.closest('.action-area');
                     actionArea.innerHTML = '<span class="text-red-500 font-bold flex items-center gap-1 text-sm">❌ Ditolak</span>';
+                    
+                    pendingCount--;
+                    successCount++;
+                    document.getElementById('count-pending').innerText = pendingCount;
+                    document.getElementById('count-success').innerText = successCount;
 
                     Swal.fire({
                         title: 'Terkirim!',
                         text: 'Logbook telah ditolak.',
                         icon: 'success'
-                    }).then(() => {
-                        // Optional: Reload data or update UI further
-                        // For now, we just leave it as marked
                     });
                 }
             });
