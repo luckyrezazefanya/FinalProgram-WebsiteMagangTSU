@@ -206,6 +206,8 @@ Route::middleware(['auth', 'role:admin_prodi|admin_fakultas|admin_super|admin_un
     Route::put('/admin/program/{id}', [ProgramController::class, 'update'])->name('admin.program.update');
     Route::delete('/admin/program/{id}', [ProgramController::class, 'destroy'])->name('admin.program.destroy');
 
+    Route::post('/admin/mitra', [ProgramController::class, 'storeMitra'])->name('admin.mitra.store');
+
     Route::get('/admin/pendaftaran', [AdminPendaftaranController::class, 'index'])->name('admin.pendaftaran.index');
     Route::put('/admin/pendaftaran/{id}', [AdminPendaftaranController::class, 'update'])->name('admin.pendaftaran.update');
     Route::put('/admin/pendaftaran/{id}/assign-dospem', [AdminPendaftaranController::class, 'assignDospem'])->name('admin.pendaftaran.assignDospem');

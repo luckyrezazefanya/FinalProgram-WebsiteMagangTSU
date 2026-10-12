@@ -113,4 +113,34 @@ class ProgramController extends Controller
             return redirect()->back()->with('error', 'Gagal menghapus program: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Store a newly created Mitra.
+     */
+    public function storeMitra(Request $request)
+    {
+        $request->validate([
+            'id_mitra'   => 'required|string|max:20|unique:mitra,id_mitra',
+            'nama_mitra' => 'required|string|max:100',
+            'alamat'     => 'nullable|string',
+            'kontak'     => 'nullable|string|max:50',
+            'gambar'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        try {
+            $data = $request->only(['id_mitra', 'nama_mitra', 'alamat', 'kontak']);
+
+            if ($request->hasFile('gambar')) {
+                $file = $request->file('gambar');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('img/mitra'), $filename);
+                $data['gambar'] = 'img/mitra/' . $filename;
+            }
+
+            Mitra::create($data);
+            return redirect()->route('admin.program.index')->with('success', 'Mitra berhasil ditambahkan!');
+        } catch (QueryException $e) {
+            return redirect()->back()->with('error', 'Gagal menambahkan mitra: ' . $e->getMessage());
+        }
+    }
 }
